@@ -1,10 +1,27 @@
 package com.ftn.isa22.general.domain;
 
+import org.hibernate.annotations.Proxy;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "addresses")
+@Proxy(lazy = false)
 public class Address {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String street;
     private String number;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride( name = "name", column = @Column(name = "city")),
+    })
     private City city;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride( name = "name", column = @Column(name = "country")),
+    })
     private Country country;
 
     public Address() {}

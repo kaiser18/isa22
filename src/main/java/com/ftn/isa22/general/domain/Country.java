@@ -1,5 +1,8 @@
 package com.ftn.isa22.general.domain;
 
+import javax.persistence.Embeddable;
+
+@Embeddable
 public class Country {
     String name;
 

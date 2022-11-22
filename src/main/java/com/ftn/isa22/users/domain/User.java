@@ -3,25 +3,46 @@ package com.ftn.isa22.users.domain;
 import com.ftn.isa22.general.domain.Address;
 import com.ftn.isa22.users.domain.enums.Gender;
 import com.ftn.isa22.users.domain.enums.Role;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
 
-public class User {
+@Entity
+@Table(name = "users")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "role", discriminatorType = DiscriminatorType.STRING)
+public abstract class User implements UserDetails {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String surname;
     private String jmbg;
     private LocalDate dateOfBirth;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Address address;
     private Gender gender;
     private String phoneNumber;
     private String email;
     private String password;
-    private Role role;
+    @Column(insertable = false, updatable = false)
+    private String role;
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinTable(name = "user_authority",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"))
+    @Fetch(value = FetchMode.SUBSELECT)
+    private List<Authority> authorities;
 
     public User() {}
 
-    public User(Long id, String name, String surname, String jmbg, LocalDate dateOfBirth, Address address, Gender gender, String phoneNumber, String email, String password, Role role) {
+    public User(Long id, String name, String surname, String jmbg, LocalDate dateOfBirth, Address address, Gender gender, String phoneNumber, String email, String password, String role, List<Authority> authorities) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -33,9 +54,10 @@ public class User {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.authorities = authorities;
     }
 
-    public User(String name, String surname, String jmbg, LocalDate dateOfBirth, Address address, Gender gender, String phoneNumber, String email, String password, Role role) {
+    public User(String name, String surname, String jmbg, LocalDate dateOfBirth, Address address, Gender gender, String phoneNumber, String email, String password, String role, List<Authority> authorities) {
         this.name = name;
         this.surname = surname;
         this.jmbg = jmbg;
@@ -46,6 +68,7 @@ public class User {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.authorities = authorities;
     }
 
     public Long getId() {
@@ -120,6 +143,15 @@ public class User {
         this.email = email;
     }
 
+    @Override
+    public List<Authority> getAuthorities() {
+        return authorities;
+    }
+
+    public void setAuthorities(List<Authority> authorities) {
+        this.authorities = authorities;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -128,11 +160,11 @@ public class User {
         this.password = password;
     }
 
-    public Role getRole() {
+    public String getRole() {
         return role;
     }
 
-    public void setRole(Role role) {
+    public void setRole(String role) {
         this.role = role;
     }
 }
