@@ -5,4 +5,5 @@ import com.ftn.isa22.users.domain.Authority;
 import java.util.List;
 
 public interface IAuthorityService {
+    List<Authority> getAllRoleAuthorities(String role);
 }
